@@ -1,0 +1,22 @@
+node_modules/
+dist/
+dist-electron/
+release/
+*.local
+.DS_Store
+.env
+.env.*
+!.env.example
+
+# Local development database artefacts
+prisma/dev.db*
+src/prisma/dev.db*
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea/

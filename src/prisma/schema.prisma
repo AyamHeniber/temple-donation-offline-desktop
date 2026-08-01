@@ -1,0 +1,107 @@
+// DonationBox - Temple Donation Receipt Management
+// Copyright (c) 2026 Ayam Heniber Meitei
+// Developed by Ayam Heniber Meitei <ayamheniber0@gmail.com>
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Settings {
+  id                  Int      @id @default(1)
+  templeName          String   @default("")
+  address             String   @default("")
+  phone               String   @default("")
+  email               String   @default("")
+  logo                String?
+  header              String   @default("")
+  footer              String   @default("")
+  receiptPrefix       String   @default("PDJM")
+  authorizedSignatory String   @default("Authorised Signatory")
+  printerName         String   @default("")
+  printCopies         Int      @default(1)
+  printSilent         Boolean  @default(false)
+  backupFolder        String   @default("")
+  updatedAt           DateTime @updatedAt
+}
+
+model Section {
+  id          Int           @id @default(autoincrement())
+  name        String        @unique
+  description String        @default("")
+  isActive    Boolean       @default(true)
+  sortOrder   Int           @default(0)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  items       ReceiptItem[]
+
+  @@index([isActive])
+}
+
+model Receipt {
+  id            Int      @id @default(autoincrement())
+  receiptNumber String   @unique
+  financialYear String
+  sequence      Int
+  donorName     String
+  donorAddress  String   @default("")
+  donorPhone    String   @default("")
+  paymentMode   String
+  referenceNo   String   @default("")
+  totalAmount   Float
+  amountInWords String
+  receiptDate   DateTime
+  receiptDateKey String
+  notes         String   @default("")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  items ReceiptItem[]
+
+  @@index([receiptDateKey])
+  @@index([donorName])
+  @@index([paymentMode])
+  @@index([financialYear])
+}
+
+model ReceiptItem {
+  id          Int    @id @default(autoincrement())
+  receiptId   Int
+  sectionId   Int
+  sectionName String
+  amount      Float
+  remarks     String @default("")
+
+  receipt Receipt @relation(fields: [receiptId], references: [id], onDelete: Cascade)
+  section Section @relation(fields: [sectionId], references: [id], onDelete: Restrict)
+
+  @@index([receiptId])
+  @@index([sectionId])
+}
+
+model ReceiptSequence {
+  id            Int      @id @default(autoincrement())
+  prefix        String
+  financialYear String
+  lastNumber    Int      @default(0)
+  updatedAt     DateTime @updatedAt
+
+  @@unique([prefix, financialYear])
+}
+
+model Backup {
+  id        Int      @id @default(autoincrement())
+  fileName  String
+  filePath  String
+  sizeBytes Int      @default(0)
+  type      String   @default("MANUAL")
+  note      String   @default("")
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}

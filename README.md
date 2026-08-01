@@ -107,8 +107,34 @@ npm run dist:dir     # unpacked build, for quick manual testing
 
 Output lands in `release/<version>/`.
 
-> Build installers on the platform you are targeting. Cross-compiling Electron
-> apps that ship a native Prisma engine is not supported.
+> **Build each installer on the platform it targets.** Prisma ships a native
+> query engine that is generated for the machine running `npm install`
+> (`binaryTargets = ["native"]`), so a Windows installer must be built on
+> Windows, a macOS DMG on macOS, and so on. Cross-compiling produces an
+> installer that cannot open its own database.
+
+### Windows
+
+Supported: Windows 10 and 11, 64-bit. `npm run dist:win` produces an NSIS
+installer under `release/<version>/`.
+
+- The installer is **per-user** (`perMachine: false`) — no administrator rights
+  are required, and the app installs under `%LOCALAPPDATA%\Programs`.
+- Data lives in `%APPDATA%\DonationBox`, so a Windows profile roams with its
+  own receipts and the installer never touches them.
+- Printing uses the default Windows printer unless one is chosen in Settings.
+- The build is x64 only. For 32-bit or ARM hardware, add the architecture to
+  the `win.target.arch` list in `electron-builder.yml` and rebuild on that
+  machine.
+
+Two Windows-specific details are handled in code and are worth knowing if you
+ever touch the database layer:
+
+1. Prisma names its engine `query_engine-windows.dll.node` on Windows but
+   `libquery_engine-*.node` elsewhere, so the lookup in
+   `src/electron/db/client.ts` matches both spellings.
+2. SQLite connection URLs must use forward slashes, so the Windows path
+   `C:\Users\…\donationbox.db` is normalised before being handed to Prisma.
 
 ---
 
