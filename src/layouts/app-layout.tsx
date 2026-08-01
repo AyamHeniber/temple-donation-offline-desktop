@@ -28,11 +28,11 @@ export function AppLayout() {
   useDataChanged('sections', () => void refreshSections())
 
   return (
-    <div className="flex h-full overflow-hidden">
+    <div className="flex h-dvh overflow-hidden">
       <Sidebar />
       <div className="flex min-w-0 flex-1 flex-col">
         <Topbar />
-        <main className="flex-1 overflow-y-auto">
+        <main className="relative flex-1 overflow-y-auto">
           <ErrorBoundary resetKey={location.pathname}>
             <div className="mx-auto w-full max-w-[1600px] space-y-6 p-6">
               <Outlet />
