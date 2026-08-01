@@ -93,8 +93,21 @@ export function Sidebar() {
         ))}
       </nav>
 
-      <div className="border-t border-sidebar-border px-5 py-3">
+      <div className="space-y-2 border-t border-sidebar-border px-5 py-3">
         <p className="text-2xs text-sidebar-foreground/50">Offline · Data stored on this computer</p>
+
+        <div className="border-t border-sidebar-border/60 pt-2">
+          <p className="text-2xs uppercase tracking-widest text-sidebar-foreground/40">Developed by</p>
+          <p className="mt-0.5 truncate text-xs font-medium text-sidebar-foreground/80">
+            Ayam Heniber Meitei
+          </p>
+          <p
+            className="selectable truncate text-2xs text-sidebar-foreground/50"
+            title="ayamheniber0@gmail.com"
+          >
+            ayamheniber0@gmail.com
+          </p>
+        </div>
       </div>
     </aside>
   )

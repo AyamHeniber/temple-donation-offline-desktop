@@ -17,13 +17,27 @@ let client: PrismaClient | null = null
 
 export const ENGINE_FILE_PATTERN = /^(?:lib)?query_engine.*\.node$/
 
+const ENGINE_FOR_PLATFORM: Partial<Record<NodeJS.Platform, RegExp>> = {
+  win32: /^query_engine-windows.*\.node$/i,
+  darwin: /^libquery_engine-darwin.*\.node$/i,
+  linux: /^libquery_engine-(?:debian|rhel|linux).*\.node$/i,
+}
+
+export function pickEngineFile(files: string[], platform: NodeJS.Platform): string | undefined {
+  const preferred = ENGINE_FOR_PLATFORM[platform]
+  return (
+    (preferred && files.find((f) => preferred.test(f))) ??
+    files.find((f) => ENGINE_FILE_PATTERN.test(f))
+  )
+}
+
 function configureEngineLocation(): void {
   if (!app.isPackaged || process.env.PRISMA_QUERY_ENGINE_LIBRARY) return
 
   const unpacked = path.join(process.resourcesPath, 'app.asar.unpacked', 'node_modules', '.prisma', 'client')
 
   try {
-    const engine = fs.readdirSync(unpacked).find((f) => ENGINE_FILE_PATTERN.test(f))
+    const engine = pickEngineFile(fs.readdirSync(unpacked), process.platform)
     if (!engine) {
       log.error('Prisma query engine not found', { unpacked })
       return
