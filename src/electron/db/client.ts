@@ -4,8 +4,9 @@
  * Developed by Ayam Heniber Meitei <ayamheniber0@gmail.com>
  */
 
-import { PrismaClient } from '@prisma/client'
+import type { PrismaClient } from '@prisma-client'
 import { app } from 'electron'
+import { createRequire } from 'node:module'
 import fs from 'node:fs'
 import path from 'node:path'
 import { createLogger } from '../core/logger'
@@ -14,6 +15,26 @@ import { databasePath } from '../core/paths'
 const log = createLogger('db')
 
 let client: PrismaClient | null = null
+
+const GENERATED_CLIENT_DIR = 'prisma-client'
+
+type PrismaClientCtor = new (options: {
+  datasources: { db: { url: string } }
+  log: Array<'warn' | 'error'>
+}) => PrismaClient
+
+function generatedClientPath(): string {
+  return path.join(app.getAppPath(), GENERATED_CLIENT_DIR)
+}
+
+function unpackedEngineDir(): string {
+  return path.join(`${app.getAppPath()}.unpacked`, GENERATED_CLIENT_DIR)
+}
+
+function loadPrismaClientCtor(): PrismaClientCtor {
+  const nodeRequire = createRequire(__filename)
+  return nodeRequire(generatedClientPath()).PrismaClient as PrismaClientCtor
+}
 
 export const ENGINE_FILE_PATTERN = /^(?:lib)?query_engine.*\.node$/
 
@@ -34,7 +55,7 @@ export function pickEngineFile(files: string[], platform: NodeJS.Platform): stri
 function configureEngineLocation(): void {
   if (!app.isPackaged || process.env.PRISMA_QUERY_ENGINE_LIBRARY) return
 
-  const unpacked = path.join(process.resourcesPath, 'app.asar.unpacked', 'node_modules', '.prisma', 'client')
+  const unpacked = unpackedEngineDir()
 
   try {
     const engine = pickEngineFile(fs.readdirSync(unpacked), process.platform)
@@ -58,7 +79,9 @@ export function getPrisma(): PrismaClient {
 
   configureEngineLocation()
 
-  client = new PrismaClient({
+  const PrismaClientCtor = loadPrismaClientCtor()
+
+  client = new PrismaClientCtor({
     datasources: { db: { url: connectionUrl() } },
     log: ['warn', 'error'],
   })

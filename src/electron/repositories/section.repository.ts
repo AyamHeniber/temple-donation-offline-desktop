@@ -4,7 +4,7 @@
  * Developed by Ayam Heniber Meitei <ayamheniber0@gmail.com>
  */
 
-import type { Prisma } from '@prisma/client'
+import type { Prisma } from '@prisma-client'
 import { getPrisma } from '../db/client'
 
 const ORDER: Prisma.SectionOrderByWithRelationInput[] = [{ sortOrder: 'asc' }, { name: 'asc' }]

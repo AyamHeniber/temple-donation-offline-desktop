@@ -12,13 +12,14 @@ files:
   - dist/**/*
   - dist-electron/**/*
   - package.json
-  - node_modules/.prisma/**/*
+  - prisma-client/**/*
   - '!**/*.map'
   - '!**/{.eslintrc,.editorconfig,.prettierrc,tsconfig.json}'
 
 asarUnpack:
-  - node_modules/.prisma/**/*
-  - node_modules/@prisma/engines/**/*
+  - prisma-client/*.node
+
+afterPack: build/after-pack.cjs
 
 extraResources:
   - from: src/prisma/schema.prisma

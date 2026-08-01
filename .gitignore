@@ -1,6 +1,7 @@
 node_modules/
 dist/
 dist-electron/
+prisma-client/
 release/
 *.local
 .DS_Store

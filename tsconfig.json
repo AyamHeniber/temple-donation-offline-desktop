@@ -27,7 +27,8 @@
 
     "types": ["node", "vite/client"],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@prisma-client": ["./prisma-client"]
     }
   },
   "include": ["src", "vite.config.ts", "tailwind.config.ts"],

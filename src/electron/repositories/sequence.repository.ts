@@ -4,7 +4,7 @@
  * Developed by Ayam Heniber Meitei <ayamheniber0@gmail.com>
  */
 
-import type { Prisma, PrismaClient } from '@prisma/client'
+import type { Prisma, PrismaClient } from '@prisma-client'
 import { getPrisma } from '../db/client'
 
 type Client = PrismaClient | Prisma.TransactionClient

@@ -118,17 +118,32 @@ The installer appears at `release/1.0.0/DonationBox-Setup-1.0.0-x64.exe`.
 Double-click it on any Windows 10/11 64-bit PC — no admin rights, no Node.js,
 no internet connection required on the target machine.
 
-**This can be built from macOS or Linux as well as from Windows.** The app has
-no compiled native modules; the only platform-specific binary is Prisma's query
-engine, and `schema.prisma` requests both targets:
+**This builds from macOS or Linux as well as from Windows** — verified. The app
+has no compiled native modules; the only platform-specific binary is Prisma's
+query engine, and `schema.prisma` requests both targets:
 
 ```prisma
-binaryTargets = ["native", "windows"]
+generator client {
+  output        = "../../prisma-client"
+  binaryTargets = ["native", "windows"]
+}
 ```
 
-`prisma generate` therefore downloads the Windows engine alongside the local
-one, and `src/electron/db/client.ts` selects the engine matching the platform
-it is actually running on. If you add another OS target, add it here too.
+Two details make this work, and both matter if you touch packaging:
+
+1. **The Prisma client is generated into `prisma-client/`, not `node_modules`.**
+   electron-builder assembles `node_modules` from the dependency tree, so a
+   *generated* folder like `node_modules/.prisma` is never copied no matter what
+   `files` globs you write — the app would ship without a database engine and
+   fail on launch. A normal project folder is copied like any other source.
+   With a custom output Prisma also copies its runtime in and requires it
+   relatively, so the client is fully self-contained.
+2. **`build/after-pack.cjs` deletes engines for other platforms** from the packed
+   output, so the Windows installer does not carry the 16 MB macOS engine.
+
+`src/electron/db/client.ts` then selects the engine matching the platform it is
+running on. If you add another OS target, add it to `binaryTargets` and to the
+map in `after-pack.cjs`.
 
 - The installer is **per-user** (`perMachine: false`) — no administrator rights
   are required, and the app installs under `%LOCALAPPDATA%\Programs`.
